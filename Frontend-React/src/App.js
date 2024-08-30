@@ -12,18 +12,21 @@ const todoEndpointUrl = process.env.REACT_APP_TODO_ENDPOINT;
 const App = () => {
   const [description, setDescription] = useState('')
   const [items, setItems] = useState([])
+  const [errorMessage, setError] = useState('')
   
  useEffect(() => {
     // todo
-    
-      getItems();
+     getItems();
           
   }, [])
 
   const renderAddTodoItemContent = () => {
     return (
       <Container>
-        <h1>Add Item</h1>
+        <h1>Add Item</h1> 
+        
+        <label><font color ="red">{errorMessage}</font></label>
+
         <Form.Group as={Row} className="mb-3" controlId="formAddTodoItem">
           <Form.Label column sm="2">
             Description
@@ -40,11 +43,12 @@ const App = () => {
         <Form.Group as={Row} className="mb-3 offset-md-2" controlId="formAddTodoItem">
           <Stack direction="horizontal" gap={2}>
             <Button variant="primary" onClick={() => handleAdd()}>
-              Add Item
+              Add Item 
             </Button>
             <Button variant="secondary" onClick={() => handleClear()}>
               Clear
             </Button>
+            
           </Stack>
         </Form.Group>
       </Container>
@@ -94,40 +98,57 @@ const App = () => {
 
   async function getItems() {
     try {
-      
+    
        axios.get(todoEndpointUrl)
-      .then(response => setItems(response.data));
+      .then(response => setItems(response.data))
+      .catch(function (error) {
+        if(error.response) {
+          setError("Update was unsuccessful!");
+        }
+      });
     } catch (error) {
-      console.error(error)
+       console.error(error)
     }
   }
 
   async function handleAdd() {
     try {
+      
+      setError('');
       //alert('todo')
+      if(description.trim().length === 0)
+      {
+        setError("Please provide task description");
+        return;
+      }
 
-       const request = {
+      const request = {
         id : uuidv4(), 
         isCompleted: false, 
         description: description
       };
 
-      await axios.post(todoEndpointUrl, request);
+      await axios.post(todoEndpointUrl, request)
+      .catch(function (error) {
+        if(error.response) {
+          setError("Update was unsuccessful!");
+        }
+      });
       await getItems();
       
     } catch (error) {
-      console.error(error)
+       console.error(error)
     }
   }
 
   function handleClear() {
-    setDescription('')
+    setDescription('');
+    setError('');
   }
 
   async function handleMarkAsComplete(item) {
     try {
-      
-      const request = {
+        const request = {
         isCompleted: true, 
         description: item.description
       };
@@ -137,7 +158,7 @@ const App = () => {
       await getItems();
 
     } catch (error) {
-      console.error(error)
+         console.error(error)
     }
   }
 

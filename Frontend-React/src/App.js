@@ -2,14 +2,22 @@ import './App.css'
 import { Image, Alert, Button, Container, Row, Col, Form, Table, Stack } from 'react-bootstrap'
 import React, { useState, useEffect } from 'react'
 
-const axios = require('axios')
+import {v4 as uuidv4} from 'uuid';
+
+//const axios = require('axios')
+
+import axios from 'axios';
+const todoEndpointUrl = process.env.REACT_APP_TODO_ENDPOINT;
 
 const App = () => {
   const [description, setDescription] = useState('')
   const [items, setItems] = useState([])
-
-  useEffect(() => {
+  
+ useEffect(() => {
     // todo
+    
+      getItems();
+          
   }, [])
 
   const renderAddTodoItemContent = () => {
@@ -81,11 +89,14 @@ const App = () => {
 
   const handleDescriptionChange = (event) => {
     // todo
+    setDescription(event.target.value);
   }
 
   async function getItems() {
     try {
-      alert('todo')
+      
+       axios.get(todoEndpointUrl)
+      .then(response => setItems(response.data));
     } catch (error) {
       console.error(error)
     }
@@ -93,7 +104,17 @@ const App = () => {
 
   async function handleAdd() {
     try {
-      alert('todo')
+      //alert('todo')
+
+       const request = {
+        id : uuidv4(), 
+        isCompleted: false, 
+        description: description
+      };
+
+      await axios.post(todoEndpointUrl, request);
+      await getItems();
+      
     } catch (error) {
       console.error(error)
     }
@@ -105,7 +126,16 @@ const App = () => {
 
   async function handleMarkAsComplete(item) {
     try {
-      alert('todo')
+      
+      const request = {
+        isCompleted: true, 
+        description: item.description
+      };
+      const putEndpointUrl = todoEndpointUrl+'/'+item.id;
+      
+      await axios.put(putEndpointUrl, request);
+      await getItems();
+
     } catch (error) {
       console.error(error)
     }
